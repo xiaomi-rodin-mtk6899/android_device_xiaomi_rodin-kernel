@@ -164,10 +164,59 @@ else
 fi
 
 # Add touch modules to vendorboot for recovery
-for module in goodix_core_rodin.ko focaltech_touch_rodin.ko xiaomi_touch_rodin.ko xiaomi_spi_tee.ko; do
-    cp modules/vendor_dlkm/$module modules/vendor_boot/
-    echo $module >> modules/vendor_boot/modules.load.recovery
-done
+#for module in goodix_core_rodin.ko focaltech_touch_rodin.ko xiaomi_touch_rodin.ko xiaomi_spi_tee.ko; do
+#    cp modules/vendor_dlkm/$module modules/vendor_boot/
+#    echo $module >> modules/vendor_boot/modules.load.recovery
+#done
+
+echo "Moving modules.load files to root with specific names..."
+# vendor_boot: modules.load -> modules.load.vendor_ramdisk
+if [ -f ./modules/vendor_boot/modules.load ]; then
+    mv ./modules/vendor_boot/modules.load ./modules.load.vendor_ramdisk
+    echo "Moved modules.load to modules.load.vendor_ramdisk"
+fi
+
+# vendor_boot: modules.load.recovery -> modules.load.recovery
+if [ -f ./modules/vendor_boot/modules.load.recovery ]; then
+    mv ./modules/vendor_boot/modules.load.recovery ./modules.load.recovery
+    echo "Moved modules.load.recovery to root"
+fi
+
+# system_dlkm: modules.load -> modules.load.system
+if [ -f ./modules/system_dlkm/modules.load ]; then
+    mv ./modules/system_dlkm/modules.load ./modules.load.system
+    echo "Moved modules.load to modules.load.system"
+fi
+
+if [ -f ./modules/system_dlkm/modules.alias ]; then
+    echo "cleaning..."
+    rm modules/system_dlkm/modules.alias
+fi
+
+if [ -f ./modules/system_dlkm/modules.dep ]; then
+    echo "cleaning..."
+    rm ./modules/system_dlkm/modules.dep
+fi
+
+if [ -f ./modules/system_dlkm/modules.softdep ]; then
+    echo "cleaning..."
+    rm ./modules/system_dlkm/modules.softdep 
+fi
+
+# vendor_dlkm: modules.load -> modules.load.vendor
+if [ -f ./modules/vendor_dlkm/modules.load ]; then
+    mv ./modules/vendor_dlkm/modules.load ./modules.load.vendor
+    echo "Moved modules.load to modules.load.vendor"
+fi
+
+if [ -f images/dtbs/01_dtbdump_MT6899.dtb ]; then
+    rm -rfv ./images/dtbs/01_dtbdump_MT6899.dtb
+fi
+
+# We have yuki kernel now
+git checkout images/dtbs/mt6899.dtb images/Image.lz4
+
+# etc.
 
 rm -rf $extract_out
 echo "Extracted files successfully"
